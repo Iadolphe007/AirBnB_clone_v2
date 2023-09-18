@@ -114,17 +114,50 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """Create an object of any class"""
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        args_array = args.split()
+        class_name = args_array[0]
+        
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
+
+        dict_params = {}
+
+        for param_index in range(1, len(args_array)):
+            param_array = args_array[param_index].split("=")
+            if len(param_array) == 2:
+                key = param_array[0]
+                if key in HBNBCommand.valid_keys[class_name]:
+                    value = self.parse_value(param_array[1])
+                    if value is not None:
+                        dict_params[key] = value
+            else:
+                pass
+
+        new_instance = HBNBCommand.classes[class_name](**dict_params)
+        new_instance.save()
         print(new_instance.id)
-        storage.save()
+
+    def parse_value(self, value_str):
+        """Parse the value based on its type"""
+        if value_str[0] == '"' and value_str[-1] == '"':
+            return value_str[1:-1].replace("_", " ").replace('\\"', '"')
+        elif '.' in value_str:
+            try:
+                 return float(value_str)
+            except ValueError:
+                return None
+        else:
+            try:
+                return int(value_str)
+            except ValueError:
+                return None
+
 
     def help_create(self):
         """ Help information for the create method """
