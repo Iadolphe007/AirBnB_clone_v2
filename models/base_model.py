@@ -6,6 +6,15 @@ from datetime import datetime
 
 class BaseModel:
     """A base class for all hbnb models"""
+    id = Column(String(60), primary_key=True, nullable=False, unique=True)
+    created_at = Column(DateTime, nullable=False, default=func.utcnow())
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=func.utcnow(),
+        onupdate=func.utcnow()
+    )
+    
     def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
         if not kwargs:
