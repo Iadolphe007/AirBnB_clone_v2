@@ -7,7 +7,7 @@ from models.review import Review
 from models.place import Place
 from models.user import User
 from models.state import State
-from models.base_model import BaseModel, Base
+from models.base_model import Base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import (create_engine)
 from os import getenv
@@ -28,11 +28,11 @@ class DBStorage():
 
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
             user, passwd, host, db), pool_pre_ping=True)
-<<<<<<< HEAD
+
         if env == 'test':
-=======
+
         if env == "test":
->>>>>>> 6e9fc4f507bd272cc07e508d3a64070fa1b7c7ac
+
             Base.metadata.drop_all(self.__engine)
 
     def all(sel, cls=None):
