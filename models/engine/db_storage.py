@@ -29,32 +29,27 @@ class DBStorage():
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
             user, passwd, host, db), pool_pre_ping=True)
 
-        if env == 'test':
-
         if env == "test":
-
             Base.metadata.drop_all(self.__engine)
 
     def all(sel, cls=None):
         """class query"""
-        class_dict = {'User': User, 'State': State, 'City': City,
-                'Amenity': Amenity, 'Place': Place, 'Review': Review}
-        obj_dict = {}
-        
-        try:
-            for key, value in clas_dict.items():
-                if cls is None or key == cls:
-                    query_result = self.__session.query(value).all()
-                    for obj in query_result:
-                        obj_dict[obj.__class__.__name__+'.' + obj.id] = obj
-        except Exception:
-            pass
-        return obj_dict
+        result = {}
+        classes_to_query = [cls] if cls else [User, Place, State, City, Amenity, Review]
+
+        for queried_cls in classes_to_query:
+            for obj in self.__session.query(queried_cls).all():
+                class_name = obj.__class__.__name__
+                key_name = f"{class_name}.{obj.id}"
+                result[key_name] = obj
+
+        return result
+
 
     def new(self, obj):
         """add obj to database"""
-        self.__session.add(obj)
-        self.save()
+        if obj:
+            self.__session.add(obj)
     def save(self):
         """commit changes"""
         self.__session.commit()
@@ -69,14 +64,5 @@ class DBStorage():
         """ create table and database """
         Base.metadata.create_all(self.__engine)
         Session = sessionmaker(bind=engine, expire_on_commit=False)
+        scoped_Session = scoped_session(Session)
         self.__session = scoped_session(Session)
-
-    def close(self):
-        """close session"""
-        self.__session.remove()
-
-
-
-
-
-        
