@@ -5,8 +5,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from os import getenv
 
-storage_type = getenv('HBNB_TYPE_STORAGE')
 
+storage_type = getenv('HBNB_TYPE_STORAGE')
     class City(BaseModel, Base):
         """ The city class, contains state ID and name """
 
@@ -18,3 +18,5 @@ storage_type = getenv('HBNB_TYPE_STORAGE')
         else:
             name = ""
             state_id = ""
+
+

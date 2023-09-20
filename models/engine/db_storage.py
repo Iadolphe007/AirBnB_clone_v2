@@ -28,7 +28,11 @@ class DBStorage():
 
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
             user, passwd, host, db), pool_pre_ping=True)
+<<<<<<< HEAD
         if env == 'test':
+=======
+        if env == "test":
+>>>>>>> 6e9fc4f507bd272cc07e508d3a64070fa1b7c7ac
             Base.metadata.drop_all(self.__engine)
 
     def all(sel, cls=None):
@@ -43,14 +47,14 @@ class DBStorage():
                     query_result = self.__session.query(value).all()
                     for obj in query_result:
                         obj_dict[obj.__class__.__name__+'.' + obj.id] = obj
-         except Exception:
-             pass
-         return obj_dict
+        except Exception:
+            pass
+        return obj_dict
 
-     def new(self, obj):
-         """add obj to database"""
-         self.__session.add(obj)
-         self.save()
+    def new(self, obj):
+        """add obj to database"""
+        self.__session.add(obj)
+        self.save()
     def save(self):
         """commit changes"""
         self.__session.commit()
