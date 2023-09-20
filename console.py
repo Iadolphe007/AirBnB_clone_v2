@@ -113,6 +113,31 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    def process_params(arg):
+        """Process args passed to create method(command)"""
+        if not isinstance(arg, list):
+            return
+        params = [item for item in arg if '=' in item]
+        valid_params = {}
+        for item in params:
+            param = item.split("=")
+            if param[1].startswith('"') and param[1].endswith('"'):
+                middle = param[1][1:-1]
+                middle = middle.replace('"', '\"')
+                middle = middle.replace("_", " ")
+                param[1] = middle
+            else:
+                try:
+                    param[1] = int(param[1])
+                except (ValueError, TypeError):
+                    try:
+                        param[1] = float(param[1])
+                    except (ValueError, TypeError):
+                        pass
+            valid_params[param[0]] = param[1]
+        return(valid_params)
+
+
     def do_create(self, args):
         """Create an object of any class"""
         if not args:
