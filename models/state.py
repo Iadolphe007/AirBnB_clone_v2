@@ -5,12 +5,16 @@ from os import getenv
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String, ForeignKey
 
+
 class State(BaseModel):
     """ State class """
-    __tablename__ = 'states'
     if getenv('HBNB_TYPE_STORAGE') == 'db':
+        __tablename__ = 'states'
         name = Column(String(128), nullable=False)
-        cities = relationship('City', backref='states', cascade='all, delete-orphan')
+        cities = relationship('City',
+                              backref='states',
+                              cascade='all,
+                              delete-orphan')
     else:
         @property
         def cities(self):

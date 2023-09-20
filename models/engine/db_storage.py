@@ -13,6 +13,7 @@ from sqlalchemy import (create_engine)
 from os import getenv
 from models.base_model import BaseModel
 
+
 class DBStorage():
     """new engine"""
     __engine = None
@@ -35,7 +36,8 @@ class DBStorage():
     def all(sel, cls=None):
         """class query"""
         result = {}
-        classes_to_query = [cls] if cls else [User, Place, State, City, Amenity, Review]
+        classes_to_query = [cls] if cls else
+        [User, Place, State, City, Amenity, Review]
 
         for queried_cls in classes_to_query:
             for obj in self.__session.query(queried_cls).all():
@@ -45,11 +47,11 @@ class DBStorage():
 
         return result
 
-
     def new(self, obj):
         """add obj to database"""
         if obj:
             self.__session.add(obj)
+
     def save(self):
         """commit changes"""
         self.__session.commit()
@@ -59,7 +61,7 @@ class DBStorage():
         if obj:
             self.__name.delete(obj)
         self.save()
-    
+
     def reload(self):
         """ create table and database """
         Base.metadata.create_all(self.__engine)
