@@ -5,21 +5,20 @@ from models.base_model import BaseModel, Base
 from os import getenv
 from sqlalchemy.orm import relationship
 
+metadata = Base.metadata 
+place_amenity = Table("place_amenity", metadata,
+                      Column("place_id", String(60),
+                             ForeignKey('places.id'),
+                             primary_key=True,
+                             nullable=False),
+                      Column("amenity_id", String(60),
+                             ForeignKey('amenities.id'),
+                             primary_key=True,
+                             nullable=False))
+
 if getenv('HBNB_TYPE_STORAGE') == 'db':
-    place_amenity = Table("place_amenity", metadata,
-                          Column("place_id", String(60),
-                                 ForeignKey('places.id'),
-                                 primary_key=True,
-                                 nullable=False),
-                          Column("amenity_id", String(60),
-                                 ForeignKey('amenities.id'),
-                                 primary_key=True,
-                                 nullable=False))
-
-
-class Place(BaseModel, Base):
-    """ A place to stay """
-    if getenv('HBNB_TYPE_STORAGE') == 'db':
+    class Place(BaseModel, Base):
+        """ A place to stay """
         __tablename__ = 'places'
         city_id = Column(String(60), ForeignKey(
             'cities.id'), nullable=False)
@@ -35,9 +34,10 @@ class Place(BaseModel, Base):
         longitude = Column(Float, nullable=True)
         reviews = relationship('Review', backref='place')
         amenities = relationship(
-            'Amenity', secondary='place_amenity', viewonly=False)
+            'Amenity',secondary='place_amenity',viewonly=False)
 
-    else:
+else:
+    class Place(BaseModel):
         """Place Model"""
         city_id = ""
         user_id = ""
@@ -51,26 +51,13 @@ class Place(BaseModel, Base):
         longitude = 0.0
         amenity_ids = []
 
-    def __init__(self, *args, **kwargs):
-        """initialize place"""
-        super().__init__(*args, **kwargs)
-
     @property
-    def reviews(self):
-        """review instamce"""
-        values_review = models.storage.all("Review").values()
-        list_review = []
-        for review in values_review:
-            if review.place_id == self.id:
-                list_review.append(review)
-        return list_review
-    if getenv('HBNB_TYPE_STORAGE') != 'db':
-        @property
-        def amenities(self):
-            """attribute that returns list of Amenity instances"""
-            values_amenity = models.storage.all("Amenity").values()
-            list_amenity = []
-            for amenity in values_amenity:
-                if amenity.place_id == self.id:
-                    list_amenity.append(amenity)
-            return list_amenity
+    def amenities(self):
+        from models import storage
+        return self.amenity_ids
+
+    @amenities.setter
+    def amenities(self, cls):
+        from models.amenity import Amenity
+        if cls.__class__ == Amenity:
+            self.amenity_ids.append(cls.id)

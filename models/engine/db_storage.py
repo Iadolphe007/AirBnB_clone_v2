@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 """Module contains database engine"""
-
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
 from models.place import Place
 from models.user import User
 from models.state import State
-from models.base_model import Base
+from models.base_model import BaseModel, Base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import (create_engine)
 from os import getenv
@@ -15,60 +14,62 @@ from models.base_model import BaseModel
 
 
 class DBStorage():
-    """new engine"""
+    """Engine class"""
     __engine = None
     __session = None
 
     def __init__(self):
-        """public instance"""
+        """Construct a dbclass"""
         user = getenv('HBNB_MYSQL_USER')
         passwd = getenv('HBNB_MYSQL_PWD')
         host = getenv('HBNB_MYSQL_HOST')
         db = getenv('HBNB_MYSQL_DB')
-        env = getenv('HBNB_ENV')
-
+        env = getenv('HBNB_MYSQL_ENV')
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
             user, passwd, host, db), pool_pre_ping=True)
-
         if env == "test":
             Base.metadata.drop_all(self.__engine)
 
-    def all(sel, cls=None):
-        """class query"""
-        result = {}
-        classes_to_query = [cls] if cls else
-        [User, Place, State, City, Amenity, Review]
+    def all(self, cls=None):
+        """Query for all classes"""
 
-        for queried_cls in classes_to_query:
-            for obj in self.__session.query(queried_cls).all():
-                class_name = obj.__class__.__name__
-                key_name = f"{class_name}.{obj.id}"
-                result[key_name] = obj
+        class_dict = {'City': City, 'State': State, 'User': User,
+                      'Place': Place, 'Review': Review, 'Amenity': Amenity}
 
-        return result
+        obj_dict = {}
+
+        try:
+            for key, value in class_dict.items():
+                if cls is None or key == cls:
+                    query_result = self.__session.query(value).all()
+                    for obj in query_result:
+                        obj_dict[obj.__class__.__name__+'.' + obj.id] = obj
+        except Exception:
+            pass
+
+        return obj_dict
 
     def new(self, obj):
-        """add obj to database"""
-        if obj:
-            self.__session.add(obj)
+        """Creates and save a new object"""
+        self.__session.add(obj)
+        self.save()
 
     def save(self):
-        """commit changes"""
+        """Commit the changes to the database"""
         self.__session.commit()
 
     def delete(self, obj=None):
-        """delete current database"""
+        """Delete the object"""
         if obj:
-            self.__name.delete(obj)
+            self.__session.delete(obj)
         self.save()
 
     def reload(self):
-        """ create table and database """
+        """Creates session on start"""
         Base.metadata.create_all(self.__engine)
-        Session = sessionmaker(bind=engine, expire_on_commit=False)
-        scoped_Session = scoped_session(Session)
+        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
         self.__session = scoped_session(Session)
 
     def close(self):
-        """session close"""
+        """Close the session"""
         self.__session.remove()

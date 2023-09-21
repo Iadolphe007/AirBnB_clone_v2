@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 """This module defines a class User"""
-from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String
-from os import getenv
+from models.base_model import BaseModel, Base
 from sqlalchemy.orm import relationship
+from os import getenv
 
 if getenv('HBNB_TYPE_STORAGE') == 'db':
     class User(BaseModel, Base):
@@ -17,7 +17,7 @@ if getenv('HBNB_TYPE_STORAGE') == 'db':
         reviews = relationship('Review', backref='user')
 else:
     class User(BaseModel):
-        """class user mdel"""
+        """Model for users"""
         email = ''
         password = ''
         first_name = ''

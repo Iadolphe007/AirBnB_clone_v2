@@ -8,30 +8,20 @@ class FileStorage:
     __file_path = 'file.json'
     __objects = {}
 
-    @property
-    def cities(self):
-        """Returns Cities in state"""
-
-    def delete(self, obj=None):
-        """Delete the provided object from storage."""
-        if obj:
-            key = f"{obj.__class__.__name__}.{obj.id}"
-            if key in FileStorage.__objects:
-                del FileStorage.__objects[key]
-                self.save()
-
     def all(self, cls=None):
-        """Returns a dictionary of models currently in storage."""
-        result_dict = {}
+        """Returns a dictionary of models currently in storage"""
+
+        obj = FileStorage.__objects
 
         if cls:
-            class_name = cls.__name__
-            result_dict = {k: v for k, v in FileStorage.__objects.items()
-                           if k.split('.')[0] == class_name}
-        else:
-            result_dict = FileStorage.__objects
+            filtered_obj = {}
+            for key in obj.keys():
+                splitted_key = key.split('.')
+                if splitted_key[0] == cls.__name__:
+                    filtered_obj[key] = obj[key]
+            return filtered_obj
 
-        return result_dict
+        return obj
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -57,10 +47,10 @@ class FileStorage:
         from models.review import Review
 
         classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
@@ -72,10 +62,15 @@ class FileStorage:
 
     def delete(self, obj=None):
         """Delete an object"""
-        if obj is not None:
-            del self.__objects[obj.__class__.__name__ + '.' + obj.id]
-            self.save
+        if obj is None:
+            return
+        try:
+            for key, value in FileStorage.__objects.items():
+                if obj == value:
+                    del FileStorage.__objects[key]
+        except:
+            pass
 
     def close(self):
-        """deserialise Json"""
+        """call reload() method for deserializing the JSON file to objects"""
         self.reload()
