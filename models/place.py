@@ -1,9 +1,8 @@
 #!/usr/bin/python3
-""" PLACE MODULE """
+""" place module """
 import os
 from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
-
 from models.base_model import BaseModel, Base
 from models.review import Review
 from models.amenity import Amenity
@@ -27,13 +26,9 @@ place_amenity = Table(
         primary_key=True
     )
 )
-"""
-MANY TO MANT RELATIONSHIP TABLE.
-"""
-
 
 class Place(BaseModel, Base):
-    """ PLACE """
+    """ place class """
     __tablename__ = 'places'
     city_id = Column(
         String(60), ForeignKey('cities.id'), nullable=False

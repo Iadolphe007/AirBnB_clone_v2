@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" REVIEW MODULE """
+""" review module  """
 from sqlalchemy import Column, String, ForeignKey
 from models.base_model import BaseModel, Base
 from sqlalchemy.orm import relationship
@@ -7,7 +7,7 @@ import os
 
 
 class Review(BaseModel, Base):
-    """REVIEW INFO CLASS."""
+    """review class info"""
     __tablename__ = 'reviews'
 
     place_id = Column(

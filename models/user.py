@@ -7,9 +7,7 @@ import os
 
 
 class User(BaseModel, Base):
-    """
-    class user
-    """
+    """ user class"""
     __tablename__ = 'users'
     email = Column(
         String(128), nullable=False

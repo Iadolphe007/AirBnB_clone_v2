@@ -33,19 +33,19 @@ class BaseModel:
                     setattr(self, key, value)
 
     def __str__(self):
-        """Returns a string representation of the instance"""
+        """return to string representation"""
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
         return '[{}] ({}) {}'.format(cls, self.id, self.__dict__)
 
     def save(self):
-        """Updates updated_at with current time when instance is changed"""
+        """Uuodate time"""
         from models import storage
         self.updated_at = datetime.now()
         storage.new(self)
         storage.save()
 
     def to_dict(self):
-        """Convert instance into dict format"""
+        """convert instance to dict"""
         dictionary = {}
         dictionary.update(self.__dict__)
         dictionary.update({'__class__':
@@ -57,8 +57,6 @@ class BaseModel:
         return dictionary
 
     def delete(self):
-        """
-        delete the current instance from the storage (models.storage)
-        """
+        """ delete current instance """
         from models import storage
         storage.delete(self)
