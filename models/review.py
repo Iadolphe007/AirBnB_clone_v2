@@ -1,27 +1,21 @@
 #!/usr/bin/python3
-""" State Module for HBNB project """
+""" Review module for the HBNB project """
+from sqlalchemy import Column, String, ForeignKey, Integer, Float
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.orm import relationship
 from os import getenv
 
-
-class State(BaseModel, Base):
-    """ State class """
-    __tablename__ = 'states'
-    if getenv('HBNB_TYPE_STORAGE') == 'db':
-        name = Column(String(128), nullable=False)
-        cities = relationship('City', backref='states', cascade='all, delete')
-    else:
-        @property
-        def cities(self):
-            """Cities Method"""
-            from models import storage
-            from models.city import City
-
-            cities = storage.all(City).values()
-            list_to_return = []
-            for value in cities:
-                if value.state_id == self.id:
-                    list_to_return.append(value)
-            return list_to_return
+if getenv('HBNB_TYPE_STORAGE') == 'db':
+    class Review(BaseModel, Base):
+        """ Review classto store review information """
+        __tablename__ = 'reviews'
+        text = Column(String(1024), nullable=False)
+        place_id = Column(String(60), ForeignKey(
+            'places.id'), nullable=False)
+        user_id = Column(String(60), ForeignKey(
+            'users.id'), nullable=False)
+else:
+    class Review(BaseModel):
+        """Review Model"""
+        place_id = ""
+        user_id = ""
+        text = ""
