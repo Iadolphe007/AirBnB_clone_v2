@@ -218,7 +218,7 @@ class HBNBCommand(cmd.Cmd):
         print_list = []
 
         if args:
-            args = args.split(' ')[0]  # remove possible trailing args
+            args = args.split(' ')[0]
             if args not in self.classes:
                 print("** class doesn't exist **")
                 return
