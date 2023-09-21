@@ -10,12 +10,11 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from datetime import datetime
 
 
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
-
-    # Interactive/non-interactive modes
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
@@ -37,7 +36,6 @@ class HBNBCommand(cmd.Cmd):
 
     def precmd(self, line):
         """Reformat command line for advanced command syntax.
-
         Usage: <class name>.<command>([<id> [<*args> or <**kwargs>]])
         (Brackets denote optional fields in usage example.)
         """
@@ -49,26 +47,21 @@ class HBNBCommand(cmd.Cmd):
 
         try:  # parse line left to right
             pline = line[:]  # parsed line
-
             # isolate <class name>
             _cls = pline[:pline.find('.')]
-
             # isolate and validate <command>
             _cmd = pline[pline.find('.') + 1:pline.find('(')]
             if _cmd not in HBNBCommand.dot_cmds:
                 raise Exception
-
             # if parantheses contain arguments, parse them
             pline = pline[pline.find('(') + 1:pline.find(')')]
             if pline:
                 # partition args: (<id>, [<delim>], [<*args>])
                 pline = pline.partition(', ')  # pline convert to tuple
-
                 # isolate _id, stripping quotes
                 _id = pline[0].replace('\"', '')
                 # possible bug here:
                 # empty quotes register as empty _id when replaced
-
                 # if arguments exist beyond _id
                 pline = pline[2].strip()  # pline is now str
                 if pline:
@@ -113,37 +106,57 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    @staticmethod
+    def parse_arg_to_dict(arg):
+        """Parses arg string to dict"""
+        if not arg:
+            return {}
+        dic = {}
+        args = arg.split(" ")
+        dic["__class__"] = args[0]
+        for arg in args[1:]:
+            arg_split = arg.split("=")
+            key = arg_split[0]
+            value = arg_split[1]
+            if value[0] in ["'", '"']:
+                value = value.strip("\"'")
+                value = value.replace("_", " ")
+                value = value.replace("\"", '\\"')
+            elif "." in value:
+                try:
+                    value = float(value)
+                except ValueError:
+                    value = str(value)
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    value = str(value)
+            dic[key] = value
+        return dic
+
     def do_create(self, args):
-        """ Create an object of any class"""
+        """
+        Create an object of any class
+        """
+        args = self.parse_arg_to_dict(args)
         if not args:
             print("** class name missing **")
             return
-
-        new_args = args.split(' ')
-        if new_args[0] not in self.classes:
+        c_name = args["__class__"]
+        del args["__class__"]
+        if c_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-
-        parms_splitted = new_args[1:]
-        new_dict = {}
-
-        for i in range(len(parms_splitted)):
-            temp_list = parms_splitted[i].split('=')
-            temp_list[1] = temp_list[1].replace('_', ' ')
-            if "\"" == temp_list[1][0]:
-                temp_list[1] = temp_list[1][1:-1]
-            new_dict[temp_list[0]] = temp_list[1]
-
-        new_instance = self.classes[new_args[0]]()
-        for key, value in new_dict.items():
-            setattr(new_instance, key, value)
-
-        storage.new(new_instance)
+        # args["created_at"] = datetime.now().isoformat()
+        # args["updated_at"] = datetime.now().isoformat()
+        new_instance = HBNBCommand.classes[c_name]()
+        new_instance.__dict__.update(args)
+        new_instance.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
-        """ Help information for the create method """
+        """Help information for the create method """
         print("Creates a class of any type")
         print("[Usage]: create <className>\n")
 
@@ -203,7 +216,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -218,17 +231,15 @@ class HBNBCommand(cmd.Cmd):
         print_list = []
 
         if args:
-            args = args.split(' ')[0]  # remove possible trailing args
-            if args not in self.classes:
+            args = args.split(' ')[0]
+            if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all().items():
+            for k, v in storage.all(args).items():
                 if k.split('.')[0] == args:
-                    del v.__dict__['_sa_instance_state']
                     print_list.append(str(v))
         else:
             for k, v in storage.all().items():
-                del v.__dict__['_sa_instance_state']
                 print_list.append(str(v))
 
         print(print_list)

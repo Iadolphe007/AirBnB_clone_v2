@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-"""This module defines a class to manage file storage for hbnb clone"""
+"""
+This module defines a class to manage file storage for hbnb clone
+"""
 import json
 
 
@@ -8,20 +10,27 @@ class FileStorage:
     __file_path = 'file.json'
     __objects = {}
 
+    def delete(self, obj=None):
+        """elete obj from __objects if its inside - if
+        obj is equal to None, the method should not do anything
+        """
+        if obj is not None:
+            key = f"{obj.__class__.__name__}.{obj.id}"
+            if key in self.__objects:
+                del self.__objects[key]
+
     def all(self, cls=None):
-        """Returns a dictionary of models currently in storage"""
-
-        obj = FileStorage.__objects
-
-        if cls:
-            filtered_obj = {}
-            for key in obj.keys():
-                splitted_key = key.split('.')
-                if splitted_key[0] == cls.__name__:
-                    filtered_obj[key] = obj[key]
-            return filtered_obj
-
-        return obj
+        """returns the list of objects of one type of class"""
+        if cls is None:
+            return self.__objects
+        else:
+            filterd_objs = {
+                    key: obj
+                    for key, obj
+                    in self.__objects.items()
+                    if isinstance(obj, cls)
+                    }
+            return filterd_objs
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -47,10 +56,10 @@ class FileStorage:
         from models.review import Review
 
         classes = {
-            'BaseModel': BaseModel, 'User': User, 'Place': Place,
-            'State': State, 'City': City, 'Amenity': Amenity,
-            'Review': Review
-        }
+                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
+                    'State': State, 'City': City, 'Amenity': Amenity,
+                    'Review': Review
+                  }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
@@ -59,18 +68,3 @@ class FileStorage:
                     self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
-
-    def delete(self, obj=None):
-        """Delete an object"""
-        if obj is None:
-            return
-        try:
-            for key, value in FileStorage.__objects.items():
-                if obj == value:
-                    del FileStorage.__objects[key]
-        except:
-            pass
-
-    def close(self):
-        """call reload() method for deserializing the JSON file to objects"""
-        self.reload()
