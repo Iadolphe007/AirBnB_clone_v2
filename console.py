@@ -15,20 +15,20 @@ from models.review import Review
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
-    # determines prompt for interactive/non-interactive modes
+    # Interactive/non-interactive modes
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
+        'BaseModel': BaseModel, 'User': User, 'Place': Place,
+        'State': State, 'City': City, 'Amenity': Amenity,
+        'Review': Review
+    }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
-             'number_rooms': int, 'number_bathrooms': int,
-             'max_guest': int, 'price_by_night': int,
-             'latitude': float, 'longitude': float
-            }
+        'number_rooms': int, 'number_bathrooms': int,
+        'max_guest': int, 'price_by_night': int,
+        'latitude': float, 'longitude': float
+    }
 
     def preloop(self):
         """Prints if isatty is false"""
@@ -114,48 +114,33 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """Create an object of any class"""
+        """ Create an object of any class"""
         if not args:
             print("** class name missing **")
             return
 
-        args_array = args.split()
-        class_name = args_array[0]
-        if class_name not in HBNBCommand.classes:
+        new_args = args.split(' ')
+        if new_args[0] not in self.classes:
             print("** class doesn't exist **")
             return
 
-        dict_params = {}
+        parms_splitted = new_args[1:]
+        new_dict = {}
 
-        for param_index in range(1, len(args_array)):
-            param_array = args_array[param_index].split("=")
-            if len(param_array) == 2:
-                key = param_array[0]
-                if key in HBNBCommand.valid_keys[class_name]:
-                    value = self.parse_value(param_array[1])
-                    if value is not None:
-                        dict_params[key] = value
-            else:
-                pass
+        for i in range(len(parms_splitted)):
+            temp_list = parms_splitted[i].split('=')
+            temp_list[1] = temp_list[1].replace('_', ' ')
+            if "\"" == temp_list[1][0]:
+                temp_list[1] = temp_list[1][1:-1]
+            new_dict[temp_list[0]] = temp_list[1]
 
-        new_instance = HBNBCommand.classes[class_name](**dict_params)
-        new_instance.save()
+        new_instance = self.classes[new_args[0]]()
+        for key, value in new_dict.items():
+            setattr(new_instance, key, value)
+
+        storage.new(new_instance)
         print(new_instance.id)
-
-    def parse_value(self, value_str):
-        """Parse the value based on its type"""
-        if value_str[0] == '"' and value_str[-1] == '"':
-            return value_str[1:-1].replace("_", " ").replace('\\"', '"')
-        elif '.' in value_str:
-            try:
-                return float(value_str)
-            except ValueError:
-                return None
-        else:
-            try:
-                return int(value_str)
-            except ValueError:
-                return None
+        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -218,7 +203,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del (storage.all()[key])
+            del(storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -234,14 +219,16 @@ class HBNBCommand(cmd.Cmd):
 
         if args:
             args = args.split(' ')[0]  # remove possible trailing args
-            if args not in HBNBCommand.classes:
+            if args not in self.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 if k.split('.')[0] == args:
+                    del v.__dict__['_sa_instance_state']
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
+                del v.__dict__['_sa_instance_state']
                 print_list.append(str(v))
 
         print(print_list)
