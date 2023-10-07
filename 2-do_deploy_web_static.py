@@ -15,11 +15,11 @@ def do_pack():
     Returns:
         Path to the archive if successful, None otherwise
     """
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    formatted_dt = datetime.now().strftime('%Y%m%d%H%M%S')
     mkdir = "mkdir -p versions"
-    path = "versions/web_static_{}.tgz".format(timestamp)
-    print('Packing web_static to {}'.format(path))
-    if local('{} && tar -cvzf {} web_static'.format(mkdir, path)).succeeded:
+    path = "versions/web_static_{}.tgz".format(formatted_dt)
+    print("Packing web_static to {}".format(path))
+    if local("{} && tar -cvzf {} web_static".format(mkdir, path)).succeeded:
         return path
     return None
 
@@ -51,3 +51,4 @@ def do_deploy(archive_path):
         return True
     except Exception:
         return False
+
