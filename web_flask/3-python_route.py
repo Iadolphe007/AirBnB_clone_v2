@@ -28,8 +28,8 @@ def hello_txt(text):
 @app.route("/python/<text>", strict_slashes=False)
 def hello_pyt(text):
     """display python ..."""
-    text = text.replace("_", " ")
-    return ("python {}".format(text))
+    txt = text.replace("_", " ")
+    return ("python {}".format(txt))
 
 
 if __name__ == "__main__":
