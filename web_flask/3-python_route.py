@@ -24,9 +24,9 @@ def hello_txt(text):
     return ("C {}".format(text))
 
 
-@app.route('/python',  defaults={'text': "is cool"}, strict_slashes=False)
+@app.route('/python', strict_slashes=False)
 @app.route("/python/<text>", strict_slashes=False)
-def hello_pyt(text):
+def hello_pyt(text="is cool"):
     """display python ..."""
     txt = text.replace("_", " ")
     return ("python {}".format(txt))
