@@ -19,7 +19,7 @@ def hello_hbnb():
 @app.route("/c/<text>", strict_slashes=False)
 def hello_txt(text):
     text = text.replace('_', ' ')
-    return "C {text}"
+    return ("C {}".format(text))
 
 
 if __name__ == "__main__":
